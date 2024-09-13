@@ -1,30 +1,31 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    main.py                                            :+:      :+:    :+:    #
+#    load_data.py                                       :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/09/08 16:35:06 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/08 16:39:03 by uahmed           ###   ########.fr        #
+#    Created: 2024/09/13 11:50:05 by uahmed            #+#    #+#              #
+#    Updated: 2024/09/13 12:01:49 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-import pandas as pd
-import argparse
+from MLP.utils import loadDataset, getData, getFeatures
 
-def main():
+def getDataFeatures(filename='data.csv'):
     '''
-    Builds a Classifier using the health data.
+    Parses the data csv file.
+    Parameters
+    ----------
+    filename: Name of the file
+    Return
+    ------
+    features: Features of the dataset.
+    data: data.
     '''
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('dataset', type=str, help='input dataset')
-    args = parser.parse_args()
+    dataset = loadDataset(filename)
+    features = getFeatures(dataset)
+    data = getData(dataset)
 
-    df = pd.read_csv(args.dataset)
-    print(df)
-
-
-if __name__ == '__main__':
-    main()
+    return features, data
