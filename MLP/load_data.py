@@ -6,13 +6,13 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/13 11:50:05 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/13 12:01:49 by uahmed           ###   ########.fr        #
+#    Updated: 2024/09/18 10:11:50 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 from MLP.utils import loadDataset, getData, getFeatures
 
-def getDataFeatures(filename='data.csv'):
+def getDataFeatures(filename):
     '''
     Parses the data csv file.
     Parameters

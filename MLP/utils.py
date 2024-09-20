@@ -14,6 +14,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from MLP.layers import DenseLayer
 
 
 importantFeatures = ['Astronomy', 'Herbology', 'Divination', 'Ancient Runes', 'Charms', 'Flying']
@@ -151,3 +152,53 @@ def plotErrorCost(cost, error):
     ax[1].set_title('Logistic Regression - Learning Rate 0.1 / Regularizatioin term 10')
 
     plt.show()
+
+def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
+    '''
+    Builts the layers.
+    Parameters
+    ----------
+    dims: dimension of each layers outputs.
+    activation: activation function.
+    weight_initializer: activation function.
+
+    Return
+    ------
+    Layers: List of layer objects
+
+    Return
+    ------
+    Layers: List of layer objects.
+    '''
+
+    layers = []
+    tot = len(dims)
+    for i in range(tot):
+        layers.append(DenseLayer(Nout=dims[i], activation=activation, weight_initializer=weight_initializer))
+    layers.append(DenseLayer(Nout=2, activation=activation, weight_initializer=weight_initializer))
+
+    return layers
+
+def save_weights(sc, filename, layers, classes):
+    '''
+    Saves the optimized weights to a file.
+    Parameters
+    ----------
+    sc: Standardizer object to calculate mean, std etc.
+    filename: Name of the file to save the weights to.
+    
+    Returns
+    -------
+    self: Returns the object
+    '''
+
+    tot_layers = len(layers)
+    with open(filename, 'w') as f:
+        for i in range(len(classes)):
+            f.write(f'{classes[i]},')
+        f.write('Mean,Std\n')
+        for i, layer in enumerate(layers):
+            for j in range(0, layer.weights.shape[1]):
+                for i in range(0, layer.weights.shape[0]):
+                    f.write(f'{layer.weights[i][j]},')
+                f.write(f'{sc._mean[j - 1]},{sc._std[j - 1]}\n')

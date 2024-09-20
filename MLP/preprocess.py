@@ -1,25 +1,25 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    preprocessing.py                                   :+:      :+:    :+:    #
+#    preprocess.py                                      :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/04 20:02:56 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/04 20:05:47 by uahmed           ###   ########.fr        #
+#    Updated: 2024/09/18 10:25:45 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import numpy as np
-from DSLR.math import Mean, Std
+from MLP.math import Mean, Std
 
-def trainTestSplit(X, y, validationSize=0.3, randomState=None):
+def trainValSplit(X, y=None, validationSize=0.3, randomState=None):
     '''
     Splits the data into train and test sets.
     Parameters
     ----------
     X: array, shape [n_samples, n_feautures]
-    y: array, shape [n_features]
+    y: array, shape [n_features], default None
     validationSize: float, default 0.3
     randomState: int, default None
     '''
@@ -28,12 +28,16 @@ def trainTestSplit(X, y, validationSize=0.3, randomState=None):
         np.random.seed(randomState)
     p = np.random.permutation(len(X))
     Xoffset = int(len(X) * validationSize)
-    yOffset = int(len(y) * validationSize)
     X_train = X[p][Xoffset:]
-    X_test = X[p][:Xoffset]
+    X_val = X[p][:Xoffset]
+    y_train = None
+    y_val = None
+    if y is None:
+        return X_train, X_val, y_train, y_val
+    yOffset = int(len(y) * validationSize)
     y_train = y[p][yOffset:]
-    y_test = y[p][:yOffset]
-    return X_train, X_test, y_train, y_test
+    y_val = y[p][:yOffset]
+    return X_train, X_val, y_train, y_val
 
 class   Standardizer(object):
     '''
