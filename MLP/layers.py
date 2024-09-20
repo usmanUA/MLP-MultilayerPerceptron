@@ -18,7 +18,7 @@ class DenseLayer(object):
     Create layers for Multilayer Perceptron.
     '''
 
-    def __init__(self, Nout, activation='softmax', weight_initializer='heUniform'):
+    def __init__(self, Nout, activation='sigmoid', weight_initializer='heUniform'):
         '''
         Constructs a Deep Layer.
         Parameters
@@ -28,7 +28,7 @@ class DenseLayer(object):
         weight_initializer: The algorithm to initialize the weights, defualt None
         '''
         self._Nout = Nout
-        self._activation = activations[activation][0]
+        self._activation = activation
         self._weight_initializer = weight_initializers[weight_initializer]
         self.Z = None
         self.A = None
@@ -47,10 +47,10 @@ class DenseLayer(object):
         A: Activation of the layers
         '''
         if not self._built:
-            self.Nin = X.shape[1]
-            self.weights = self._weight_initializer(self.Nin, self._Nout)
+            self.Nin = X.shape[0]
+            self.weights = self._weight_initializer(self._Nout, self.Nin)
             self.bias = np.zeros((self._Nout, 1))
             self._built = True
-        self.Z = self.weights.dot(X.T) + self.bias
-        self.A = self._activation(self.Z)
+        self.Z = self.weights.dot(X) + self.bias
+        self.A = activations[self._activation][0](self.Z)
         return self.A

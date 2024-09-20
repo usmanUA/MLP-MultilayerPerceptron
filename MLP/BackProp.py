@@ -30,13 +30,18 @@ class   BackProp(object):
         mlp: feedforward model containing all layers and variables.
         dA: gradient of the loss with respect to the predictions.
         '''
-        layerSize = size(mlp.layers) - 1
+        layerSize = len(mlp.layers) - 1
+        # TODO: take m to the constructor if needed be
+        m = dZ.shape[1]
         while layerSize > 0:
             current = mlp.layers[layerSize]
             prev = mlp.layers[layerSize-1]
+            # NOTE: update the weights of current layer
             current.weights -= self._eta * (1/m) * dZ.dot(prev.A.T)
-            current.bias -= self._eta * (1/m) * sum(dZ)
+            # NOTE: update the bias of current layer
+            current.bias -= self._eta * (1/m) * np.sum(dZ, axis=1, keepdims=True)
+            # NOTE: compute gradient of the previous layer
             dA_prev = current.weights.T.dot(dZ)
-            activation_gradient = prev.A.dot(1 - prev.A)
+            activation_gradient = prev.A.T.dot(1 - prev.A)
             dZ = dA_prev.dot(activation_gradient)
             layerSize = layerSize - 1

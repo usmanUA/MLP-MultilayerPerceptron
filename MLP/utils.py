@@ -175,7 +175,7 @@ def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
     tot = len(dims)
     for i in range(tot):
         layers.append(DenseLayer(Nout=dims[i], activation=activation, weight_initializer=weight_initializer))
-    layers.append(DenseLayer(Nout=2, activation=activation, weight_initializer=weight_initializer))
+    layers.append(DenseLayer(Nout=2))
 
     return layers
 

@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 from MLP.preprocess import trainValSplit, Standardizer
-from MLP.math import cost_functions
+from MLP.math import cost_functions, softmax
 from MLP.BackProp import BackProp
 import numpy as np
 
@@ -36,9 +36,11 @@ class   MLP(object):
         ----------
         layers: list of layers
         '''
+        X = X.T
         for layer in self.layers:
             X = layer(X)
-        return X
+        preds = softmax(X)
+        return preds
 
 class   MultilayerPerceptron(object):
     '''
@@ -76,8 +78,8 @@ class   MultilayerPerceptron(object):
         '''
         y_matr = self.makeY(y)
         for _ in range(self._epochs):
-            outputs = self._mlp(X)
-            self._backprop.propagate(mlp, outputs - y_matr)
+            preds = self._mlp(X)
+            self._backprop.propagate(mlp, preds - y_matr)
             self._cost.append(cost_functions[self._loss](outputs, y_matr))
 
         return self

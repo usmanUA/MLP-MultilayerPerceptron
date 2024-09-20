@@ -142,24 +142,47 @@ def softmax(A):
     den = np.exp(A[:, 0]) + np.exp(A[:, 1])
     return num / den
 
-def dsigmoid(Z):
+def dsigmoid(A):
+    '''
+    Computes the gradient of sigmoid function.
+
+    Parameters
+    ----------
+    A: activation of the current layer
+
+    Return
+    ------
+    g': gradient of the sigmoid function
     '''
 
-    '''
-    return sigmoid(Z).dot((1 - sigmoid(Z)).T)
+    return A.dot((1 - A))
 
-def dReLU(Z):
+def dReLU(A):
+    '''
+    Computes the gradient of ReLU function.
+
+    Parameters
+    ----------
+    A: activation of the current layer
+
+    Return
+    ------
+    g': gradient of the ReLU function
     '''
 
-    '''
-
-    Z[Z > 0] = 1
-    Z[Z <= 0] = 0
-    return Z
+    return (A > 0).astype(float)
 
 def dTanh(Z):
     '''
+    Computes the gradient of Tanh function.
 
+    Parameters
+    ----------
+    A: activation of the current layer
+
+    Return
+    ------
+    g': gradient of the Tanh function
     '''
     return (np.exp(Z) - np.exp(-Z)) / (np.exp(Z) + np.exp(-Z))
 
@@ -201,7 +224,6 @@ activations = {
     'sigmoid': [sigmoid, dsigmoid],
     'ReLU': [ReLU, dReLU],
     'Tanh': [Tanh, dTanh],
-    'softmax': softmax
 }
 
 cost_functions = {
