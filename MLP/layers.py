@@ -28,14 +28,15 @@ class DenseLayer(object):
         weight_initializer: The algorithm to initialize the weights, defualt None
         '''
         self._Nout = Nout
-        self._activation = activation
+        self.activation = activation
         self._weight_initializer = weight_initializers[weight_initializer]
+        self.X = None
         self.Z = None
         self.A = None
         self._built = False
 
 
-    def __call__(self, X):
+    def __call__(self, X, Set='train'):
         '''
         Calls the Layers activation.
         Parameters
@@ -46,11 +47,18 @@ class DenseLayer(object):
         -------
         A: Activation of the layers
         '''
-        if not self._built:
+        if not self._built and Set == 'train':
             self.Nin = X.shape[0]
-            self.weights = self._weight_initializer(self._Nout, self.Nin)
+            self.X = X
+            self.weights = self._weight_initializer(self.Nin, self._Nout)
+            #self.weights = np.zeros((self._Nout, self.Nin))
             self.bias = np.zeros((self._Nout, 1))
             self._built = True
-        self.Z = self.weights.dot(X) + self.bias
-        self.A = activations[self._activation][0](self.Z)
+        if Set == 'train':
+            self.Z = self.weights.dot(X) + self.bias
+            self.A = activations[self.activation][0](self.Z)
+        elif Set == 'val':
+            Z = self.weights.dot(X) + self.bias
+            A = activations[self.activation][0](Z)
+            return A
         return self.A
