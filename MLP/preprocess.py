@@ -61,7 +61,8 @@ class   Standardizer(object):
         ----------
         X: array, shape [n_samples, n_feautures]
         '''
-        for index in range(X.shape[1]):
+        features = X.shape[1]
+        for index in range(features):
             self._mean = np.append(self._mean, Mean(X[:, index]))
             self._std = np.append(self._std, Std(X[:, index]))
 
