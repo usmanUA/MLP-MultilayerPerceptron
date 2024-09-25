@@ -12,13 +12,28 @@ An MLP consists of multiple layers of neurons where each neuron in a layer is fu
 ## Features
 
 - Input layer, one or more hidden layers, and an output layer.
-- Sigmoid activation function for non-linearity.
-- Gradient-based optimization using backpropagation.
-- Cross-entropy loss for classification problems.
+- Activation Functions: Sigmoid, ReLU, Leaky ReLU, Tanh.
+- Mini-Batch Gradient-based optimization using backpropagation.
+- Loss functions: BinaryCrossEntropy, CategoritcalCrossEntropy, and MeanAbsoluteError.
 
 ## Installation
 
 Clone the repository:
 ```bash
 git clone https://github.com/yourusername/mlp-project.git
-train.py [-h] [--layer LAYER [LAYER ...]] [--activation ACTIVATION] [--epochs EPOCHS] [--loss LOSS] [--batch_size BATCH_SIZE] [--learning_rate LEARNING_RATE]
+```
+Analyze the data:
+```bash
+python3 analyze.py -h
+python3 analyze.py [-h] [--describe DESCRIBE] [--pairplot PAIRPLOT]
+```
+Split data into training and test sets:
+```bash
+python3 splitdata.py -h
+python3 splitdata.py [-h] [--test_size TEST_SIZE]
+```
+Train the model:
+```bash
+python3 train.py -h
+python3 train.py [-h] [--layer LAYER [LAYER ...]] [--activation ACTIVATION] [--epochs EPOCHS] [--loss LOSS] [--batch_size BATCH_SIZE] [--learning_rate LEARNING_RATE]
+```
