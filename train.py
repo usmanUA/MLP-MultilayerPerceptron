@@ -12,8 +12,8 @@
 
 from MLP.model import MultilayerPerceptron, MLP
 from MLP.load_data import getDataFeatures
-from MLP.preprocess import trainValSplit
-from MLP.utils import buildLayers
+from MLP.preprocess import trainValSplit, Standardizer
+from MLP.utils import buildLayers, save_weights, plotErrorCost
 import pandas as pd
 import argparse
 import numpy as np
@@ -36,12 +36,16 @@ def main():
     X = data[:, 1:]
     y = data[:, 0]
     X_train, X_val, y_train, y_val = trainValSplit(X, y, validationSize=0.2, randomState=4)
+    sc = Standardizer()
+    sc.fit(X_train)
+    X_train = sc.transform(X_train)
+    X_val = sc.transform(X_val)
     layers = buildLayers(dims=args.layer, activation=args.activation, weight_initializer='heUniform')
     mlp = MLP(layers)
     model = MultilayerPerceptron(mlp, args.learning_rate, args.epochs, args.loss, args.batch_size, ['M', 'B'])
-    model.fit(X_train, y_train)
+    model.fit(X_train, y_train, X_val, y_val)
+    plotErrorCost(model)
     save_weights(sc, './datasets/weights.csv', layers)
-
 
 if __name__ == '__main__':
     main()
