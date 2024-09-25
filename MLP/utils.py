@@ -17,8 +17,6 @@ import pandas as pd
 from MLP.layers import DenseLayer
 
 
-importantFeatures = ['Astronomy', 'Herbology', 'Divination', 'Ancient Runes', 'Charms', 'Flying']
-
 def loadDataset(fileName):
     '''Loads the dataset file and writes entries to a numpy array'''
     dataset = []
@@ -144,12 +142,12 @@ def plotErrorCost(cost, error):
     ax[0].plot(range(1, len(cost)+1), cost, marker='o')
     ax[0].set_xlabel('Epochs')
     ax[0].set_ylabel('Cost Function')
-    ax[0].set_title('Logistic Regression - Learning Rate 0.1 / Regularizatioin term 10')
+    ax[0].set_title('Multilayer Preceptron - Learning Rate 0.01')
 
     ax[1].plot(range(1, len(error)+1), error, marker='o')
     ax[1].set_xlabel('Epochs')
     ax[1].set_ylabel('Missclasifications')
-    ax[1].set_title('Logistic Regression - Learning Rate 0.1 / Regularizatioin term 10')
+    ax[0].set_title('Multilayer Preceptron - Learning Rate 0.01')
 
     plt.show()
 
@@ -175,8 +173,7 @@ def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
     tot = len(dims)
     for i in range(tot):
         layers.append(DenseLayer(Nout=dims[i], activation=activation, weight_initializer=weight_initializer))
-    layers.append(DenseLayer(Nout=2))
-
+    layers.append(DenseLayer(Nout=2, activation='sigmoid', weight_initializer='glorotUniform'))
     return layers
 
 def save_weights(sc, filename, layers, classes):
