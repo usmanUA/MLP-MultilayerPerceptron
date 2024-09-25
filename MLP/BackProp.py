@@ -10,6 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
+import numpy as np
+from MLP.math import activations
 
 class   BackProp(object):
     '''
@@ -22,7 +24,7 @@ class   BackProp(object):
         '''
         self._eta = eta
 
-    def propagate(self, mlp, dZ):
+    def propagate(self, mlp, dZ, m):
         '''
         Back propagates and updates the weights.
         Parameters
@@ -31,17 +33,27 @@ class   BackProp(object):
         dA: gradient of the loss with respect to the predictions.
         '''
         layerSize = len(mlp.layers) - 1
-        # TODO: take m to the constructor if needed be
-        m = dZ.shape[1]
         while layerSize > 0:
             current = mlp.layers[layerSize]
             prev = mlp.layers[layerSize-1]
+
             # NOTE: update the weights of current layer
-            current.weights -= self._eta * (1/m) * dZ.dot(prev.A.T)
+            current.weights = current.weights - self._eta * (1/m) * dZ.dot(prev.A.T)
+
             # NOTE: update the bias of current layer
-            current.bias -= self._eta * (1/m) * np.sum(dZ, axis=1, keepdims=True)
-            # NOTE: compute gradient of the previous layer
+            current.bias = current.bias - self._eta * (1/m) * np.sum(dZ, axis=1, keepdims=True)
+
+            # NOTE: compute gradient of the previous layer's activations
             dA_prev = current.weights.T.dot(dZ)
-            activation_gradient = prev.A.T.dot(1 - prev.A)
-            dZ = dA_prev.dot(activation_gradient)
+
+            # NOTE: compute gradient of the previous layer's activation function
+            activation_gradient = activations[prev.activation][1](prev.Z)
+
+            # NOTE: compute gradient of the previous layer's logits
+            dZ = dA_prev * activation_gradient
+
             layerSize = layerSize - 1
+        # NOTE: last layer's weights/bias update
+        current = mlp.layers[layerSize]
+        current.weights = current.weights - self._eta * (1/m) * dZ.dot(current.X.T)
+        current.bias = current.bias - self._eta * (1/m) * np.sum(dZ, axis=1, keepdims=True)
