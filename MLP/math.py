@@ -79,9 +79,18 @@ def Percentile(X, p):
 def HeUniform(Nin, Nout):
     '''
     Initializes the Weights based on HeUniform Distribution.
+
+    Parameters
+    ----------
+    Nin: Input dimension
+    Nout: Output dimension
+
+    Return
+    ------
+    W: Randomly initialized weights, (Nin, Nout)
     '''
-    input = 6 / Nin
-    W = np.random.uniform(-np.sqrt(input), np.sqrt(input), (Nout, Nin))
+    limit = np.sqrt(6 / Nin)
+    W = np.random.uniform(-limit, limit, (Nout, Nin))
     return W
 
 def HeNormal(Nin, Nout):
@@ -89,57 +98,107 @@ def HeNormal(Nin, Nout):
     Initializes the Weights based on HeNormal Distribution.
     '''
     input = 2 / Nin
-    W = np.random.randn(0, np.sqrt(input), (Nin, Nout))
+    W = np.random.randn(0, np.sqrt(input), (Nout, Nin))
     return W
 
 def GlorotUniform(Nin, Nout):
     '''
     Initializes the Weights based on GlorotUniform Distribution.
     '''
-    input = 6 / (Nin + Nout)
-    W = np.random.uniform(-np.sqrt(input), np.sqrt(input), (Nin, Nout))
+    input = np.sqrt(6 / (Nin + Nout))
+    W = np.random.uniform(-input, input, (Nout, Nin))
     return W
 
 def GlorotNormal(Nin, Nout):
     '''
     Initializes the Weights based on GlorotNormal Distribution.
     '''
-    input = 2 / (Nin + Nout)
-    W = np.random.randn(0, np.sqrt(input), (Nin, Nout))
+    input = np.sqrt(2 / (Nin + Nout))
+    W = np.random.randn(0, input, (Nout, Nin))
     return W
 
 def LeCunNormal(Nin, Nout):
     '''
     Initializes the Weights based on LeCunNormal Distribution.
     '''
-    W = np.random.randn(0, np.sqrt(1 / Nin), (Nin, Nout))
+    W = np.random.randn(0, np.sqrt(1 / Nin), (Nout, Nin))
+    return W
+
+def LeCunUniform(Nin, Nout):
+    '''
+    Initializes the Weights based on LeCunNormal Distribution.
+    '''
+    limit = np.sqrt(3 / Nin)
+    W = np.random.uniform(-limit, limit, (Nout, Nin))
     return W
 
 def sigmoid(Z):
     '''
 
     '''
-    return 1 / (1 + np.exp(Z))
+    Z = Z.astype(float)
+    return 1.0 / (1.0 + np.exp(-Z))
 
 def ReLU(Z):
     '''
+    Computes activation using ReLU activation function.
 
+    Parameter
+    ---------
+    Z: Input data (n_sampes, n_features)
+
+    Return
+    ------
+    A: ReLU activation (n_samples, n_features)
     '''
-    zeros = np.zeros([Z.shape[0], Z.shape[1]])
-    return max(zeros, Z)
+    zeros = np.zeros_like(Z)
+    return np.maximum(zeros, Z)
+
+def LeakyReLU(Z, alpha=0.01):
+    '''
+    Computes activation using Leaky ReLU activation function.
+
+    Parameter
+    ---------
+    Z: Input data (n_sampes, n_features)
+    alpha: default 0.01
+
+    Return
+    ------
+    A: Leaky ReLU activation (n_samples, n_features)
+    '''
+
+    return np.where(Z > 0, Z, Z * alpha)
 
 def Tanh(Z):
     '''
+    Computes activation using Tanh activation function.
 
+    Parameter
+    ---------
+    Z: Input data (n_sampes, n_features)
+    alpha: default 0.01
+
+    Return
+    ------
+    A: Tanh activation (n_samples, n_features)
     '''
     return (np.exp(Z) - np.exp(-Z)) / (np.exp(Z) + np.exp(-Z))
 
 def softmax(A):
     '''
+    Implements softmax.
 
+    Parameters
+    ----------
+    A: Activations (n_samples, n_classes)
+
+    Return
+    ------
+    p: probabilities for each class (n_samples, n_classes)
     '''
-    num = np.exp(A)
-    den = np.exp(A[:, 0]) + np.exp(A[:, 1])
+    num = np.exp(A - np.max(A, axis=0, keepdims=True))
+    den = np.sum(num, axis=0, keepdims=True)
     return num / den
 
 def dsigmoid(A):
@@ -154,10 +213,9 @@ def dsigmoid(A):
     ------
     g': gradient of the sigmoid function
     '''
+    return A * (1 - A)
 
-    return A.dot((1 - A))
-
-def dReLU(A):
+def dReLU(Z):
     '''
     Computes the gradient of ReLU function.
 
@@ -169,8 +227,22 @@ def dReLU(A):
     ------
     g': gradient of the ReLU function
     '''
+    return np.where(Z > 0, 1, 0)
 
-    return (A > 0).astype(float)
+def dLeakyReLU(Z, alpha=0.01):
+    '''
+    Computes devivative of LeakyReLU activation.
+
+    Parameter
+    ---------
+    Z: Input data (n_sampes, n_features)
+    alpha: default 0.01
+
+    Return
+    ------
+    dA: derivative of Leaky ReLU activation (n_samples, n_features)
+    '''
+    return np.where(Z > 0, 1, alpha)
 
 def dTanh(Z):
     '''
@@ -186,18 +258,36 @@ def dTanh(Z):
     '''
     return (np.exp(Z) - np.exp(-Z)) / (np.exp(Z) + np.exp(-Z))
 
-def BinaryCrossEntropy(predY, trueY):
+def BinaryCrossEntropy(predY, trueY, m):
     '''
+    Calculates the binary cross entropy.
 
+    Parameters
+    ---------
+    predY: Predicted y matrix (n_classes, n_samples)
+    trueY: True y matrix (n_classes, n_samples)
+
+    Return
+    ------
+    loss: Loss of the predictions
     '''
-    m = trueY.shape[0]
-    yOneTerm = trueY.dot(np.log(predY).T)
-    yZeroTerm = (1 - trueY).dot(np.log(1 - predY).T)
-    return -sum(yOneTerm + yZeroTerm) / m
+    yOneTerm = trueY * (np.log(predY))
+    yZeroTerm = (1 - trueY) * (np.log(1 - predY))
+    loss = (-1 / m) * np.sum(yOneTerm + yZeroTerm)
+    return loss
 
 def CategoricalCrossEntropy(predY, trueY):
     '''
+    Calculates the categorical cross entropy.
 
+    Parameters
+    ---------
+    predY: Predicted y matrix (n_classes, n_samples)
+    trueY: True y matrix (n_classes, n_samples)
+
+    Return
+    ------
+    loss: Loss for the model
     '''
     m = trueY.shape[0]
     yOneTerm = trueY.dot(np.log(predY).T)
@@ -206,8 +296,18 @@ def CategoricalCrossEntropy(predY, trueY):
 
 def MSE(predY, trueY):
     '''
+    Calculates the mean square error.
 
+    Parameters
+    ---------
+    predY: Predicted y matrix (n_classes, n_samples)
+    trueY: True y matrix (n_classes, n_samples)
+
+    Return
+    ------
+    loss: Loss for the model
     '''
+
     m = trueY.shape[0]
     sqDiff = (trueY - predY) ** 2
     return sum(sqDiff) / m
@@ -223,6 +323,7 @@ weight_initializers = {
 activations = {
     'sigmoid': [sigmoid, dsigmoid],
     'ReLU': [ReLU, dReLU],
+    'leakyReLU': [LeakyReLU, dLeakyReLU],
     'Tanh': [Tanh, dTanh],
 }
 
