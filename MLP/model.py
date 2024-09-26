@@ -118,7 +118,6 @@ class   MultilayerPerceptron(object):
 
             # NOTE: print train and validation loss for each epoch
             print(f'\033[38mepoch {i}/{self._epochs} - loss: {self.train_loss[i]} - val_loss: {self.val_loss[i]}\033[0m')
-        exit(10)
 
         return self
 
