@@ -15,7 +15,7 @@ from MLP.math import *
 def describe(features, data):
     '''Mimics pandas dataframe.describe() function'''
 
-    print(f"{"":15}|{"Count  ":>11}|{"Mean  ":>11}|{"Std  ":>11}|{"Min  ":>11}|{"25%  ":>11}|{"50%  ":>11}|{"75%  ":>11}|{"Max  ":>11}")
+    print(f'{"":15}|{"Count  ":>11}|{"Mean  ":>11}|{"Std  ":>11}|{"Min  ":>11}|{"25%  ":>11}|{"50%  ":>11}|{"75%  ":>11}|{"Max  ":>11}')
     for i, feature in enumerate(features):
         print(f"{feature:15.15}", end="|")
         try:
