@@ -13,7 +13,7 @@
 from MLP.model import MultilayerPerceptron, MLP
 from MLP.load_data import getDataFeatures
 from MLP.preprocess import trainValSplit, Standardizer
-from MLP.utils import buildLayers, save_weights, plotErrorCost
+from MLP.utils import buildLayers, save_weights, plotAccuracy_Cost
 import pandas as pd
 import argparse
 import numpy as np
@@ -44,8 +44,9 @@ def main():
     mlp = MLP(layers)
     model = MultilayerPerceptron(mlp, args.learning_rate, args.epochs, args.loss, args.batch_size, ['M', 'B'])
     model.fit(X_train, y_train, X_val, y_val)
-    plotErrorCost(model)
-    save_weights(sc, './datasets/weights.csv', layers)
+    plotAccuracy_Cost(model.train_loss, model.train_accuracy)
+    plotAccuracy_Cost(model.val_loss, model.val_accuracy)
+    save_weights(sc, './dataset/weights.csv', layers, ['M', 'B'])
 
 if __name__ == '__main__':
     main()
