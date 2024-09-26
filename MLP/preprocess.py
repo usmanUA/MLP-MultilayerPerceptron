@@ -51,20 +51,24 @@ class   Standardizer(object):
     '''
 
     def __init__(self, mean=np.array([]), std=np.array([])) -> None:
-        self._mean = mean
-        self._std = std
+        self.mean = mean
+        self.std = std
+        self.gamma = None
+        self.beta = None
 
-    def fit(self, X):
+    def __call__(self, X):
         '''
-        Calculates the mean and std of the data
+        Applies batch normalization to the inputs.
+
         Parameters
         ----------
         X: array, shape [n_samples, n_feautures]
+
         '''
         features = X.shape[1]
         for index in range(features):
-            self._mean = np.append(self._mean, Mean(X[:, index]))
-            self._std = np.append(self._std, Std(X[:, index]))
+            self.mean = np.append(self._mean, Mean(X[:, index]))
+            self.std = np.append(self._std, Std(X[:, index]))
 
     def transform(self, X):
         '''

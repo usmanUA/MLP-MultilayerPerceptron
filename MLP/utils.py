@@ -33,8 +33,8 @@ def loadDataset(fileName):
                             entry = np.nan
                     row.append(entry)
                 dataset.append(row)
-        except csv.Error as e:
-            print(f"File: {fileName}, line number: {reader.line_num}, error: {e}")
+        except csv.accuracy as e:
+            print(f"File: {fileName}, line number: {reader.line_num}, accuracy: {e}")
     return  np.array(dataset, dtype=object)
 
 def modelData(dataset, features, action):
@@ -129,24 +129,24 @@ def plotGraph(X, Y, legend, indices, ax=None):
                     ax.scatter(x, y, s=1, color=color, alpha=0.5)
 
 
-def plotErrorCost(cost, error):
+def plotAccuracy_Cost(cost, accuracy):
     '''
-    Plots the cost and error of the Logistic Regression Model.
+    Plots the cost and accuracy of the Logistic Regression Model.
     Parameters
     ---------
     cost: Cost History, shape (n_iter, )
-    error: Errors History , shape (n_iter, )
+    accuracy: accuracy History , shape (n_iter, )
     '''
 
     _, ax = plt.subplots(nrows=1, ncols=2, figsize=(14, 6), constrained_layout=True)
-    ax[0].plot(range(1, len(cost)+1), cost, marker='o')
+    ax[0].plot(range(1, len(cost)+1), cost, marker='o', color='violet')
     ax[0].set_xlabel('Epochs')
     ax[0].set_ylabel('Cost Function')
     ax[0].set_title('Multilayer Preceptron - Learning Rate 0.01')
 
-    ax[1].plot(range(1, len(error)+1), error, marker='o')
+    ax[1].plot(range(1, len(accuracy)+1), accuracy, marker='o', color='red')
     ax[1].set_xlabel('Epochs')
-    ax[1].set_ylabel('Missclasifications')
+    ax[1].set_ylabel('Accuracy')
     ax[0].set_title('Multilayer Preceptron - Learning Rate 0.01')
 
     plt.show()
