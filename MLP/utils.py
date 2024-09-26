@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from MLP.layers import DenseLayer
+from MLP.preprocess import Standardizer
 
 
 def loadDataset(fileName):
@@ -172,8 +173,10 @@ def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
     layers = []
     tot = len(dims)
     for i in range(tot):
-        layers.append(DenseLayer(Nout=dims[i], activation=activation, weight_initializer=weight_initializer))
-    layers.append(DenseLayer(Nout=2, activation='sigmoid', weight_initializer='glorotUniform'))
+        sc = Standardizer()
+        layers.append(DenseLayer(Nout=dims[i], BN=sc, activation=activation, weight_initializer=weight_initializer))
+    sc = Standardizer()
+    layers.append(DenseLayer(Nout=2, BN=sc, activation='sigmoid', weight_initializer='glorotUniform'))
     return layers
 
 def save_weights(sc, filename, layers, classes):

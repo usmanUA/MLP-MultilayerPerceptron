@@ -50,13 +50,16 @@ class   Standardizer(object):
         Standard deviation of the training dataset
     '''
 
-    def __init__(self, mean=np.array([]), std=np.array([])) -> None:
+    def __init__(self, mean=np.array([]), std=np.array([]), epsilon= 0.001, gamma=1, beta=0) -> None:
         self.mean = mean
         self.std = std
-        self.gamma = None
-        self.beta = None
+        self.gamma = gammma
+        self.beta = beta
+        self.epsilon = epsilon
+        self._features = None
+        self._built = False
 
-    def __call__(self, X):
+    def __call__(self, X, Set='train'):
         '''
         Applies batch normalization to the inputs.
 
@@ -65,16 +68,12 @@ class   Standardizer(object):
         X: array, shape [n_samples, n_feautures]
 
         '''
-        features = X.shape[1]
-        for index in range(features):
-            self.mean = np.append(self._mean, Mean(X[:, index]))
-            self.std = np.append(self._std, Std(X[:, index]))
-
-    def transform(self, X):
-        '''
-        Transforms the given data using its mean and std.
-        Parameters
-        ----------
-        X: array, shape [n_samples, n_feautures]
-        '''
-        return ((X - self._mean) / self._std)
+        if not self._built and Set == 'train':
+            self._features = X.shape[1]
+            self._built = True
+        if Set == 'train'
+            for index in range(self._features):
+                self.mean = np.append(self._mean, Mean(X[:, index]))
+                self.std = np.append(self._std, Std(X[:, index]))
+        X_norm = (X - self._mean) / (self._std  + self.epsilon)
+        return self.gamma * X_norm + self.beta

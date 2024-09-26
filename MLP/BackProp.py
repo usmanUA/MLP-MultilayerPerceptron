@@ -37,6 +37,10 @@ class   BackProp(object):
             current = mlp.layers[layerSize]
             prev = mlp.layers[layerSize-1]
 
+            # NOTE: update BN parameters
+            current.BN.beta = current.BN.beta - self._eta * np.sum(dZ)
+            current.BN.gamma = current.BN.gamma - self._eta * (np.sum(dZ) * current.Z)
+
             # NOTE: update the weights of current layer
             current.weights = current.weights - self._eta * (1/m) * dZ.dot(prev.A.T)
 
@@ -53,6 +57,11 @@ class   BackProp(object):
             dZ = dA_prev * activation_gradient
 
             layerSize = layerSize - 1
+
+        # NOTE: update BN parameters for the last layer
+        current.BN.beta = current.BN.beta - self._eta * np.sum(dZ)
+        current.BN.gamma = current.BN.gamma - self._eta * (np.sum(dZ) * current.Z)
+
         # NOTE: last layer's weights/bias update
         current = mlp.layers[layerSize]
         current.weights = current.weights - self._eta * (1/m) * dZ.dot(current.X.T)
