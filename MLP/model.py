@@ -6,13 +6,12 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/13 22:23:36 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/13 22:24:14 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/01 13:18:52 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from MLP.preprocess import trainValSplit, Standardizer
+from MLP.preprocess import trainValSplit
 from MLP.math import cost_functions, softmax
-from MLP.BackProp import BackProp
 import numpy as np
 
 class   MLP(object):
@@ -20,13 +19,14 @@ class   MLP(object):
     Feed Forward Calculator.
     '''
 
-    def __init__(self, layers):
+    def __init__(self, layers, eta):
         '''
         Constructs MLP, a feedforward model.
         Parameters
         ----------
         layers: List of DenseLayer objects
         '''
+        self._eta = eta
         self.layers = layers
 
     def __call__(self, X, Set='train'):
@@ -48,12 +48,27 @@ class   MLP(object):
         preds = softmax(X)
         return preds
 
+    def propagate(self, dZ, m):
+        '''
+        Back propagates and updates the weights.
+        Parameters
+        ----------
+        mlp: feedforward model containing all layers and variables.
+        dA: gradient of the loss with respect to the predictions.
+        '''
+        layers = len(self.layers) - 1
+        while layers > 0:
+            dZ = self.layers[layers].update(dZ, m, self._eta, self.layers[layers-1])
+            layers= layers- 1
+        self.layers[layers].update(dZ, m, self._eta, self.layers[layers], last_layer=True)
+
+
 class   MultilayerPerceptron(object):
     '''
     Trains Binary Classifier.
     '''
 
-    def __init__(self, mlp, eta, epochs, loss, batch_size, classes):
+    def __init__(self, mlp, epochs, loss, batch_size, classes):
         '''
         Constucts MultilayerPerceptron.
         Parameters
@@ -65,7 +80,6 @@ class   MultilayerPerceptron(object):
         batch_size: Size of each batch
         '''
         self._mlp = mlp
-        self._backprop = BackProp(eta)
         self._epochs = epochs
         self._lossFunc = loss
         self._batch_size = batch_size
@@ -96,7 +110,7 @@ class   MultilayerPerceptron(object):
                 train_preds = self._mlp(train_X[j:self._batch_size+j, :])
                 train_labels = np.where(train_preds > 0.5, 1, 0)
                 batch_m = self._batch_size
-                self._backprop.propagate(self._mlp, train_preds - train_y, batch_m)
+                self._mlp.propagate(train_preds - train_y, batch_m)
 
             # NOTE: predictions based on whole training set
             train_preds = self._mlp(train_X, Set='val')

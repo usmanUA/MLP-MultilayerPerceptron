@@ -15,7 +15,7 @@ from MLP.math import activations
 
 class   BackProp(object):
     '''
-
+    Implements Back Propagation for Multilayer Perception
     '''
 
     def __init__(self, eta):

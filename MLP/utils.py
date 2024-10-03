@@ -6,7 +6,7 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/07 22:37:31 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/13 22:17:46 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/01 13:13:32 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from MLP.layers import DenseLayer
-from MLP.preprocess import Standardizer
 
 
 def loadDataset(fileName):
@@ -152,7 +151,7 @@ def plotAccuracy_Cost(cost, accuracy):
 
     plt.show()
 
-def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
+def buildLayers(dims=[], BN=[], activation='sigmoid', weight_initializer=None):
     '''
     Builts the layers.
     Parameters
@@ -173,10 +172,8 @@ def buildLayers(dims=[], activation='sigmoid', weight_initializer=None):
     layers = []
     tot = len(dims)
     for i in range(tot):
-        sc = Standardizer()
-        layers.append(DenseLayer(Nout=dims[i], BN=sc, activation=activation, weight_initializer=weight_initializer))
-    sc = Standardizer()
-    layers.append(DenseLayer(Nout=2, BN=sc, activation='sigmoid', weight_initializer='glorotUniform'))
+        layers.append(DenseLayer(Nout=dims[i], BN_info=BN, activation=activation, weight_initializer=weight_initializer))
+    layers.append(DenseLayer(Nout=2, activation='sigmoid', weight_initializer='glorotUniform'))
     return layers
 
 def save_weights(sc, filename, layers, classes):

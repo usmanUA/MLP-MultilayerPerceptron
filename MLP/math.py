@@ -32,17 +32,16 @@ def Mean(X):
         tot += val
     return tot / count 
 
-def Std(X):
-    '''Calculates and returns standard deviation of the given feature column.'''
-    mean = Mean(X)
-    tot = 0
+def Std(X, mean):
+    '''Calculates and returns variance of the given feature column.'''
+    tot = 0.0
     count = 0
     for val in X:
         if np.isnan(val):
             continue
         count += 1
         tot += (val - mean) ** 2
-    return (tot / count) ** 0.5
+    return (tot / count)
 
 
 def Min(X):
