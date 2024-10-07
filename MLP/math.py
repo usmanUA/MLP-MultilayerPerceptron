@@ -32,7 +32,7 @@ def Mean(X):
         tot += val
     return tot / count 
 
-def Std(X, mean):
+def Variance(X, mean):
     '''Calculates and returns variance of the given feature column.'''
     tot = 0.0
     count = 0
@@ -327,6 +327,6 @@ activations = {
 }
 
 cost_functions = {
-    'binaryCrossentropy': BinaryCrossEntropy,
-    'categoricalCrossentropy': CategoricalCrossEntropy
+    'binaryCrossEntropy': BinaryCrossEntropy,
+    'categoricalCrossEntropy': CategoricalCrossEntropy
 }

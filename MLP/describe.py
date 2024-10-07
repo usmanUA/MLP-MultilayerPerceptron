@@ -25,7 +25,7 @@ def describe(features, data):
                 raise Exception('NaN value encountered')
             print(f"{Count(X):>11.4f}", end="|")
             print(f"{Mean(X):>11.4f}", end="|")
-            print(f"{Std(X):>11.4f}", end="|")
+            print(f"{Variance(X):>11.4f}", end="|")
             print(f"{Min(X):>11.4f}", end="|")
             print(f"{Percentile(X, 25):>11.4f}", end="|")
             print(f"{Percentile(X, 50):>11.4f}", end="|")
