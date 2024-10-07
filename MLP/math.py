@@ -6,7 +6,7 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/08/30 21:23:49 by uahmed            #+#    #+#              #
-#    Updated: 2024/09/18 10:28:14 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/07 10:17:51 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -113,14 +113,14 @@ def GlorotNormal(Nin, Nout):
     Initializes the Weights based on GlorotNormal Distribution.
     '''
     input = np.sqrt(2 / (Nin + Nout))
-    W = np.random.randn(0, input, (Nout, Nin))
+    W = np.random.randn(Nout, Nin) * input
     return W
 
 def LeCunNormal(Nin, Nout):
     '''
     Initializes the Weights based on LeCunNormal Distribution.
     '''
-    W = np.random.randn(0, np.sqrt(1 / Nin), (Nout, Nin))
+    W = np.random.randn(Nout, Nin) * np.sqrt(1 / Nin)
     return W
 
 def LeCunUniform(Nin, Nout):
@@ -182,7 +182,7 @@ def Tanh(Z):
     ------
     A: Tanh activation (n_samples, n_features)
     '''
-    return (np.exp(Z) - np.exp(-Z)) / (np.exp(Z) + np.exp(-Z))
+    return 1 - np.tanh(Z) ** 2
 
 def softmax(A):
     '''
@@ -289,9 +289,7 @@ def CategoricalCrossEntropy(predY, trueY):
     loss: Loss for the model
     '''
     m = trueY.shape[0]
-    yOneTerm = trueY.dot(np.log(predY).T)
-    yZeroTerm = (1 - trueY).dot(np.log(1 - predY).T)
-    return sum(yOneTerm + yZeroTerm) / m
+    return -np.sum(trueY * np.log(predY)) / m
 
 def MSE(predY, trueY):
     '''

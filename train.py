@@ -6,11 +6,12 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/13 22:17:26 by uahmed            #+#    #+#              #
-#    Updated: 2024/10/01 13:11:38 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/07 10:24:45 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 from MLP.model import MultilayerPerceptron
+from MLP.optimizers import AdamOptimizer, SGD
 from MLP.layers import DenseLayer, BatchNormalizationLayer, ActivationLayer
 from MLP.load_data import getDataFeatures
 from MLP.preprocess import trainValSplit
@@ -44,7 +45,9 @@ def main():
                 BatchNormalizationLayer(),
                 ActivationLayer(activation='leakyReLU'),
                 DenseLayer(2, activation='sigmoid', weight_initializer='glorotUniform')])
-    model.fit(network, X_train, X_val, y_train, y_val, args.loss, args.learning_rate, args.batch_size, args.epochs)
+#    optimizer = AdamOptimizer(args.learning_rate, 0.0001, 0.89, 0.92, network.layers)
+    optimizer = SGD(args.learning_rate, network.layers)
+    model.fit(network, X_train, X_val, y_train, y_val, args.loss, args.batch_size, args.epochs, optimizer)
     # plotAccuracy_Cost(model.train_loss, model.train_accuracy)
     # plotAccuracy_Cost(model.val_loss, model.val_accuracy)
     #save_weights(sc, './dataset/weights.csv', layers, ['M', 'B'])

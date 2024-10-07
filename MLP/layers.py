@@ -6,7 +6,7 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/17 09:01:41 by uahmed            #+#    #+#              #
-#    Updated: 2024/10/01 13:19:49 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/07 09:30:38 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ class DenseLayer(object):
         activation: The activation function, defualt 'sigmoid'
         weight_initializer: The algorithm to initialize the weights, defualt heUniform
         '''
+        self.learnable = True
         self._Nout = Nout
         self.activation = activation
         self._weight_initializer = weight_initializers[weight_initializer]
@@ -49,26 +50,26 @@ class DenseLayer(object):
         if not self._built and Set == 'train':
             self.Nin = X.shape[0]
             self.A = None
-            self.weights = self._weight_initializer(self.Nin, self._Nout)
-            self.bias = np.zeros((self._Nout, 1))
+            self.param1 = self._weight_initializer(self.Nin, self._Nout)
+            self.param2 = np.zeros((self._Nout, 1))
             self._built = True
         if Set == 'train':
             self.X = X
-            self.Z = self.weights.dot(self.X) + self.bias
+            self.Z = self.param1.dot(self.X) + self.param2
 #            print(f'\033[38mDL output: min: {np.min(self.Z)} and max: {np.max(self.Z)} in Z\033[0m')
             if self.activation:
                 self.A = activations[self.activation][0](self.Z)
                 return self.A
             return self.Z
         elif Set == 'val':
-            Z = self.weights.dot(X) + self.bias
+            Z = self.param1.dot(X) + self.param2
             if self.activation:
                 return activations[self.activation][0](Z)
             return Z
 
-    def update(self, dZ, m, eta, last_layer=False):#, prev_layer):#, ):
+    def backprop(self, dZ, last_layer=False):#, prev_layer):#, ):
         '''
-        Updates its weights and bias using BackPropagation.
+        Calculates its gradients using BackPropagation.
 
         Parameters
         ----------
@@ -79,14 +80,14 @@ class DenseLayer(object):
         dZ: Gradient of logits to pass to the previous layer.
         '''
 
-        # NOTE: update the weights of current layer
-        self.weights = self.weights - eta * (1/m) * dZ.dot(self.X.T)
+        # NOTE: calculate the gradients of weights
+        self.grad1 = dZ.dot(self.X.T)
 
-        # NOTE: update the bias of current layer
-        self.bias = self.bias - eta * (1/m) * np.sum(dZ, axis=1, keepdims=True)
+        # NOTE: calculate the gradients of bias
+        self.grad2 = np.sum(dZ, axis=1, keepdims=True)
 
         # NOTE: compute gradient of the previous layer's activations
-        dA = self.weights.T.dot(dZ)
+        dA = self.param1.T.dot(dZ)
         #print(f'\033[38mDLs gradient output: min: {np.min(dA)} and max: {np.max(dA)} in dA\033[0m')
         if not self.activation or (self.activation and last_layer == True):
             return dA
@@ -112,7 +113,8 @@ class   BatchNormalizationLayer(object):
         Standard deviation of the training dataset
     '''
 
-    def __init__(self, epsilon= 0.001, momentum=0.9) -> None:
+    def __init__(self, epsilon=0.001, momentum=0.99) -> None:
+        self.learnable = True
         self.epsilon = epsilon
         self.momentum = momentum
         self._built = False
@@ -128,8 +130,8 @@ class   BatchNormalizationLayer(object):
         '''
         if not self._built and Set == 'train':
             self._features = Z.shape[0]
-            self.gamma = np.ones((self._features,1))
-            self.beta = np.zeros((self._features,1))
+            self.param1 = np.ones((self._features,1))
+            self.param2 = np.zeros((self._features,1))
             self.mean = np.zeros((self._features,1))
             self.variance = np.ones((self._features,1))
             self._built = True
@@ -145,14 +147,14 @@ class   BatchNormalizationLayer(object):
             self.Z_norm = (Z - mean) / (np.sqrt(variance  + self.epsilon))
             self.mean = self.momentum * self.mean + (1.0 - self.momentum) * mean
             self.variance = self.momentum * self.variance + (1.0 - self.momentum) * variance
-            self.Z_prime = self.gamma * self.Z_norm + self.beta
+            self.Z_prime = self.param2 * self.Z_norm + self.param2
             #print(f'\033[35mBNs output: min: {np.min(self.Z_prime)} and max: {np.max(self.Z_prime)} in Z_prime\033[0m')
             return self.Z_prime
         if Set == 'val':
             Z = (Z - self.mean) / (np.sqrt(self.variance  + self.epsilon))
-            return self.gamma * Z + self.beta
+            return self.param1 * Z + self.param2
 
-    def update(self, dY, eta, m, last_layer=False):
+    def backprop(self, dY, m, last_layer=False):
         '''
         Updates its gamma and beta parameters using BackPropagation.
 
@@ -166,7 +168,7 @@ class   BatchNormalizationLayer(object):
         '''
 
         # NOTE: convert dY to dZ
-        dZ_norm = dY * self.gamma
+        dZ_norm = dY * self.param1
         zeroMean = self.Z - self.mean
         invVar = 1.0/np.sqrt(self.variance+self.epsilon)
         dVar = (np.sum(dZ_norm * zeroMean * -0.5 * (self.variance + self.epsilon)**(-3/2), axis=1,keepdims=True))/m
@@ -175,8 +177,8 @@ class   BatchNormalizationLayer(object):
 
         #print(f'\033[35mBNs gradient output: min: {np.min(dZ)} and max: {np.max(dZ)} in dZ\033[0m')
         # NOTE: update BN parameters
-        self.beta = self.beta - eta * np.sum(dY, axis=1, keepdims=True)
-        self.gamma =self.gamma - eta * np.sum(dY * self.Z_norm, axis=1, keepdims=True)
+        self.grad2 = np.sum(dY, axis=1, keepdims=True)
+        self.grad1 = np.sum(dY * self.Z_norm, axis=1, keepdims=True)
 
         return dZ
 
@@ -198,6 +200,7 @@ class   ActivationLayer(object):
         ------
         Nothing.
         '''
+        self.learnable = False
         self.activation = activation
 
     def __call__(self, Z, Set='train'):
@@ -219,9 +222,9 @@ class   ActivationLayer(object):
         #print(f'A in A: {self.A}')
         return self.A
 
-    def update(self, dA, eta=None, m=None, last_layer=False):
+    def backprop(self, dA, m=None, last_layer=False):
         '''
-        Updates its gamma and beta parameters using BackPropagation.
+        Computes logits gradient using BackPropagation.
 
         Parameters
         ----------

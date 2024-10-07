@@ -6,7 +6,7 @@
 #    By: uahmed <uahmed@student.hive.fi>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/13 22:23:36 by uahmed            #+#    #+#              #
-#    Updated: 2024/10/01 13:18:52 by uahmed           ###   ########.fr        #
+#    Updated: 2024/10/07 09:51:45 by uahmed           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,7 +48,7 @@ class   MLP(object):
         preds = softmax(X)
         return preds
 
-    def propagate(self, dA, m, eta):
+    def propagate(self, dA, m):
         '''
         Back propagates and updates the weights.
         Parameters
@@ -57,10 +57,10 @@ class   MLP(object):
         dA: gradient of the loss with respect to the predictions.
         '''
         layers = len(self.layers) - 1
-        dA = self.layers[layers].update(dA, m, eta, last_layer=True)#, self.layers[layers-1])
+        dA = self.layers[layers].backprop(dA, last_layer=True)#, self.layers[layers-1])
         layers = layers - 1
         while layers >= 0:
-            dA = self.layers[layers].update(dA, m, eta)#, self.layers[layers-1])
+            dA = self.layers[layers].backprop(dA, m)#, self.layers[layers-1])
             layers = layers - 1
 
 
@@ -102,7 +102,7 @@ class   MultilayerPerceptron(object):
         return MLP(layers)
 
 
-    def fit(self, network, train_X, val_X, train_y, val_y, loss, learning_rate, batch_size, epochs):
+    def fit(self, network, train_X, val_X, train_y, val_y, loss, batch_size, epochs, optimizer):
         '''
         Trains Multilayer Perceptron.
 
@@ -124,15 +124,16 @@ class   MultilayerPerceptron(object):
         for i in range(epochs):
             # NOTE: train the model with mini-batches for each epoch
             for j in range(batches):
-                print(f'\033[31mBatch Number: {j}\033[0m')
+                #print(f'\033[31mBatch Number: {j}\033[0m')
                 train_y = train_y_matr[:, j:batch_size+j]
                 train_preds = network(train_X[j:batch_size+j, :])
                 train_labels = np.where(train_preds > 0.5, 1, 0)
                 batch_m = batch_size
-                network.propagate(train_preds - train_y, batch_m, learning_rate)
+                network.propagate(train_preds - train_y, batch_m)
+                optimizer.apply_gradients(batch_m)
 
             # NOTE: predictions based on whole training set
-            print(f'\033[31mPredicting Whole training DATA: {j}\033[0m')
+            #print(f'\033[31mPredicting Whole training DATA: {j}\033[0m')
             train_preds = network(train_X, Set='val')
             train_labels = np.where(train_preds > 0.5, 1, 0)
 
@@ -142,7 +143,7 @@ class   MultilayerPerceptron(object):
             print(f'\033[35mtrain accuracy: {self.train_accuracy[i]}\033[0m')
 
             # NOTE: predictions based on whole validation set
-            print("Done with Training data, predicting Validation")
+            #print("Done with Training data, predicting Validation")
             val_preds = network(val_X, Set='val')
             val_labels = np.where(val_preds > 0.5, 1, 0)
 
